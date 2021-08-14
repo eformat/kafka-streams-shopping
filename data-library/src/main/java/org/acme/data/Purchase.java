@@ -11,16 +11,18 @@ public class Purchase {
     private Integer quantity;
     private Double price;
     private String creditCardNumber;
+    private String store;
 
     private Date transactionDate;
     private PurchaseKey purchaseKey;
 
-    public Purchase(String customerId, String creditCardNumber, String item, int quantity, double price) {
+    public Purchase(String customerId, String creditCardNumber, String item,  String store, int quantity, double price) {
         this.item = item;
         this.quantity = quantity;
         this.price = price;
         this.customerId = customerId;
         this.creditCardNumber = creditCardNumber;
+        this.store = store;
         this.transactionDate = Date.from(Instant.now());
         this.purchaseKey = new PurchaseKey(customerId, this.transactionDate);
     }
@@ -77,6 +79,14 @@ public class Purchase {
         this.creditCardNumber = creditCardNumber;
     }
 
+    public String getStore() {
+        return store;
+    }
+
+    public void setStore(String store) {
+        this.store = store;
+    }
+
     public static Builder builder(Purchase purchase){
         return new Builder(purchase);
     }
@@ -112,12 +122,12 @@ public class Purchase {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Purchase purchase = (Purchase) o;
-        return Objects.equals(customerId, purchase.customerId) && Objects.equals(item, purchase.item) && Objects.equals(quantity, purchase.quantity) && Objects.equals(price, purchase.price) && Objects.equals(creditCardNumber, purchase.creditCardNumber) && Objects.equals(transactionDate, purchase.transactionDate) && Objects.equals(purchaseKey, purchase.purchaseKey);
+        return Objects.equals(customerId, purchase.customerId) && Objects.equals(item, purchase.item) && Objects.equals(quantity, purchase.quantity) && Objects.equals(price, purchase.price) && Objects.equals(creditCardNumber, purchase.creditCardNumber) && Objects.equals(store, purchase.store) && Objects.equals(transactionDate, purchase.transactionDate) && Objects.equals(purchaseKey, purchase.purchaseKey);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(customerId, item, quantity, price, creditCardNumber, transactionDate, purchaseKey);
+        return Objects.hash(customerId, item, quantity, price, creditCardNumber, store, transactionDate, purchaseKey);
     }
 
     @Override
@@ -128,6 +138,7 @@ public class Purchase {
                 ", quantity=" + quantity +
                 ", price=" + price +
                 ", creditCardNumber='" + creditCardNumber + '\'' +
+                ", store='" + store + '\'' +
                 ", transactionDate=" + transactionDate +
                 ", purchaseKey=" + purchaseKey +
                 '}';

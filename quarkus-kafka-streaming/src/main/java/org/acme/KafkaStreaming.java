@@ -21,6 +21,8 @@ public class KafkaStreaming {
     private final String MASKED = "masked";
     private final String REWARDS = "rewards";
     private final String BIGSPENDERS = "bigspenders";
+    private final String NORTH = "north";
+    private final String SOUTH = "south";
     private final String STORAGE = "storage";
 
     @Produces
@@ -59,6 +61,15 @@ public class KafkaStreaming {
                 .filter((purchaseKey, purchase) -> purchase.getPrice() > 5.00)
                 .selectKey(purchaseDateAsKey)
                 .to(BIGSPENDERS, Produced.with(Serdes.Long(), purchaseSerde));
+
+        // branch split for north and south regions
+        builder.stream(MASKED, Consumed.with(purchaseKeySerde, purchaseSerde))
+                .split()
+                .branch((purchaseKey, purchase) -> purchase.getStore().equalsIgnoreCase("syd")
+                        || purchase.getStore().equalsIgnoreCase("bne"), Branched.withConsumer(ks -> ks.to(NORTH)))
+                .branch((purchaseKey, purchase) -> purchase.getStore().equalsIgnoreCase("mlb")
+                        || purchase.getStore().equalsIgnoreCase("ade")
+                        || purchase.getStore().equalsIgnoreCase("pth"), Branched.withConsumer(ks -> ks.to(SOUTH)));
 
         // build the streams topology
         return builder.build();

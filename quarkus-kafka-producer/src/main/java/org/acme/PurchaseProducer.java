@@ -29,6 +29,7 @@ public class PurchaseProducer {
     private static final Map<Integer, String> CUSTOMERS;
     private static final Map<Integer, String> ITEMS;
     private static final Map<Integer, String> CARDS;
+    private static final Map<Integer, String> STORE;
 
     static {
         CUSTOMERS = new HashMap<Integer, String>();
@@ -51,6 +52,15 @@ public class PurchaseProducer {
         CARDS.put(2, "5105-1051-0510-5100");
     }
 
+    static {
+        STORE = new HashMap<Integer, String>();
+        STORE.put(1, "BNE");
+        STORE.put(2, "SYD");
+        STORE.put(3, "MLB");
+        STORE.put(4, "ADE");
+        STORE.put(5, "PTH");
+    }
+
     @GET
     @Path("/buy")
     public Response generatePurchase() {
@@ -59,6 +69,7 @@ public class PurchaseProducer {
                 CUSTOMERS.get(ThreadLocalRandom.current().nextInt(1, CUSTOMERS.size() + 1)),
                 CARDS.get(ThreadLocalRandom.current().nextInt(1, CARDS.size() + 1)),
                 ITEMS.get(ThreadLocalRandom.current().nextInt(1, ITEMS.size() + 1)),
+                STORE.get(ThreadLocalRandom.current().nextInt(1, STORE.size() + 1)),
                 ThreadLocalRandom.current().nextInt(1, 10),
                 price.doubleValue());
         purchases.send(KafkaRecord.of(purchase.getPurchaseKey(), purchase));
