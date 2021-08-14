@@ -30,4 +30,26 @@ Partition: %p
 Offset: %o
 Headers: %h'
 ```
-# kafka-streams-shopping
+
+Install data-library
+```bash
+cd data-library && mvn package install
+```
+
+Run quarkus-kafka-streaming
+````bash
+cd quarkus-kafka-streaming
+mvn quarkus:dev
+````
+
+Run aurkus-kafka-producer
+````bash
+cd quarkus-kafka-producer
+mvn quarkus:dev
+````
+
+Make a random purchase
+```bash
+curl -s -H 'accept: */*' http://localhost:8082/buy | jq .
+```
+

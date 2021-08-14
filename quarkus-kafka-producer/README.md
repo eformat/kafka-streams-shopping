@@ -30,7 +30,11 @@ Offset: %o
 Headers: %h'
 ```
 
-Run Streaming application
+Install data-library
+```bash
+cd data-library && mvn package install
+```
+Run application
 ````bash
 cd quarkus-kafka-producer
 mvn quarkus:dev
