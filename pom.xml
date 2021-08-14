@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.acme</groupId>
+  <artifactId>kafka-streams-shopping</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+
+  <packaging>pom</packaging>
+
+  <properties>
+    <!-- override in modules as desired  -->
+  </properties>
+
+  <modules>
+    <module>data-library</module>
+    <module>quarkus-kafka-producer</module>
+    <module>quarkus-kafka-streaming</module>
+  </modules>
+
+  <dependencyManagement>
+    <dependencies>
+      <!-- shared dependencies -->
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+      <!-- shared dependencies -->
+  </dependencies>
+
+  <build>
+    <plugins>
+      <!-- shared plugins -->
+    </plugins>
+
+    <pluginManagement>
+      <plugins>
+      </plugins>
+    </pluginManagement>
+  </build>
+
+</project>
+
