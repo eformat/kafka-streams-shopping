@@ -8,17 +8,19 @@ public class Purchase {
 
     private String customerId;
     private String item;
-    private int quantity;
-    private double price;
+    private Integer quantity;
+    private Double price;
+    private String creditCardNumber;
 
     private Date transactionDate;
     private PurchaseKey purchaseKey;
 
-    public Purchase(String customerId, String item, int quantity, double price) {
+    public Purchase(String customerId, String creditCardNumber, String item, int quantity, double price) {
         this.item = item;
         this.quantity = quantity;
         this.price = price;
         this.customerId = customerId;
+        this.creditCardNumber = creditCardNumber;
         this.transactionDate = Date.from(Instant.now());
         this.purchaseKey = new PurchaseKey(customerId, this.transactionDate);
     }
@@ -35,7 +37,6 @@ public class Purchase {
         this.customerId = customerId;
     }
 
-
     public String getItem() {
         return item;
     }
@@ -44,19 +45,19 @@ public class Purchase {
         this.item = item;
     }
 
-    public int getQuantity() {
+    public Integer getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(int quantity) {
+    public void setQuantity(Integer quantity) {
         this.quantity = quantity;
     }
 
-    public double getPrice() {
+    public Double getPrice() {
         return price;
     }
 
-    public void setPrice(double price) {
+    public void setPrice(Double price) {
         this.price = price;
     }
 
@@ -68,17 +69,55 @@ public class Purchase {
         this.transactionDate = transactionDate;
     }
 
+    public String getCreditCardNumber() {
+        return creditCardNumber;
+    }
+
+    public void setCreditCardNumber(String creditCardNumber) {
+        this.creditCardNumber = creditCardNumber;
+    }
+
+    public static Builder builder(Purchase purchase){
+        return new Builder(purchase);
+    }
+
+    public static class Builder {
+        private Purchase purchase;
+
+        Builder(Purchase purchase) {
+            purchase.setCreditCardNumber(maskCreditCard(purchase.getCreditCardNumber()));
+            this.purchase = purchase;
+        }
+
+        private String maskCreditCard(String creditCardNumber) {
+            final String CC_NUMBER_REPLACEMENT="xxxx-xxxx-xxxx-";
+            String[] parts = creditCardNumber.split("-");
+            if (parts.length < 4 ) {
+                creditCardNumber = "xxxx";
+            } else {
+                String last4Digits = creditCardNumber.split("-")[3];
+                creditCardNumber = CC_NUMBER_REPLACEMENT + last4Digits;
+            }
+            return creditCardNumber;
+        }
+
+        public Purchase build() {
+            return this.purchase;
+        }
+
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Purchase purchase = (Purchase) o;
-        return quantity == purchase.quantity && Double.compare(purchase.price, price) == 0 && Objects.equals(customerId, purchase.customerId) && Objects.equals(item, purchase.item) && Objects.equals(transactionDate, purchase.transactionDate) && Objects.equals(purchaseKey, purchase.purchaseKey);
+        return Objects.equals(customerId, purchase.customerId) && Objects.equals(item, purchase.item) && Objects.equals(quantity, purchase.quantity) && Objects.equals(price, purchase.price) && Objects.equals(creditCardNumber, purchase.creditCardNumber) && Objects.equals(transactionDate, purchase.transactionDate) && Objects.equals(purchaseKey, purchase.purchaseKey);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(customerId, item, quantity, price, transactionDate, purchaseKey);
+        return Objects.hash(customerId, item, quantity, price, creditCardNumber, transactionDate, purchaseKey);
     }
 
     @Override
@@ -88,6 +127,7 @@ public class Purchase {
                 ", item='" + item + '\'' +
                 ", quantity=" + quantity +
                 ", price=" + price +
+                ", creditCardNumber='" + creditCardNumber + '\'' +
                 ", transactionDate=" + transactionDate +
                 ", purchaseKey=" + purchaseKey +
                 '}';
