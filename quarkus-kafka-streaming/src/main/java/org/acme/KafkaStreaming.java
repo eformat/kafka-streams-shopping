@@ -12,6 +12,7 @@ import org.apache.kafka.streams.kstream.*;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.ws.rs.Path;
+import java.util.Date;
 
 @Path("/")
 @ApplicationScoped
@@ -71,8 +72,21 @@ public class KafkaStreaming {
                         || purchase.getStore().equalsIgnoreCase("ade")
                         || purchase.getStore().equalsIgnoreCase("pth"), Branched.withConsumer(ks -> ks.to(SOUTH)));
 
+        // Security dept. made me do this, joe is a bad customer?
+        ForeachAction<PurchaseKey, Purchase> purchaseForeachAction = (purchaseKey, purchase) -> SecurityDBService.saveRecord(purchase.getTransactionDate(), purchase.getCustomerId(), purchase.getItem());
+        builder.stream(MASKED, Consumed.with(purchaseKeySerde, purchaseSerde))
+                .filter((purchaseKey, purchase) -> purchaseKey.getCustomerId().equalsIgnoreCase("joe"))
+                .foreach(purchaseForeachAction);
+
         // build the streams topology
         return builder.build();
+    }
+
+
+    public interface SecurityDBService {
+        static void saveRecord(Date date, String employeeId, String item) {
+            System.out.println(">>> Warning!! Found potential problem !! Saving transaction on "+date+" for "+employeeId+" item "+ item);
+        }
     }
 
 }
