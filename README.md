@@ -1,5 +1,7 @@
 # kafka-streaming-shopping
 
+![images/kafka-shopping.png](images/kafka-shopping.png)
+
 ### Basic Usage
 
 Run kafka cluster
