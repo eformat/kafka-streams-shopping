@@ -14,7 +14,7 @@ Create kafka topics
 
 ```bash
 add_path /opt/kafka_2.13-2.8.0/bin
-for x in purchases masked rewards storage; do
+for x in purchases masked rewards bigspenders storage; do
   kafka-topics.sh --create --bootstrap-server localhost:9092 --replication-factor 1 --partitions 1 --topic $x;
 done
 ```
@@ -41,6 +41,13 @@ Offset: %o
 Headers: %h'
 
 kafkacat -b localhost:9092 -t rewards -o beginning -C -f '\nKey (%K bytes): %k
+Value (%S bytes): %s
+Timestamp: %T
+Partition: %p
+Offset: %o
+Headers: %h'
+
+kafkacat -b localhost:9092 -t bigspenders -o beginning -s key=q -C -f '\nKey (%K bytes): %k
 Value (%S bytes): %s
 Timestamp: %T
 Partition: %p

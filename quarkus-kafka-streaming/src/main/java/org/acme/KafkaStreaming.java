@@ -7,9 +7,7 @@ import org.acme.data.Reward;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.Topology;
-import org.apache.kafka.streams.kstream.Consumed;
-import org.apache.kafka.streams.kstream.KStream;
-import org.apache.kafka.streams.kstream.Produced;
+import org.apache.kafka.streams.kstream.*;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
@@ -22,6 +20,7 @@ public class KafkaStreaming {
     private final String PURCHASES = "purchases";
     private final String MASKED = "masked";
     private final String REWARDS = "rewards";
+    private final String BIGSPENDERS = "bigspenders";
     private final String STORAGE = "storage";
 
     @Produces
@@ -53,6 +52,13 @@ public class KafkaStreaming {
         builder.stream(MASKED, Consumed.with(purchaseKeySerde, purchaseSerde))
                 .mapValues(p -> new Reward(p))
                 .to(REWARDS, Produced.with(purchaseKeySerde, rewardSerde));
+
+        // bigspenders
+        KeyValueMapper<PurchaseKey, Purchase, Long> purchaseDateAsKey = (purchaseKey, purchase) -> purchase.getPurchaseKey().getTransactionDate().getTime();
+        builder.stream(MASKED, Consumed.with(purchaseKeySerde, purchaseSerde))
+                .filter((purchaseKey, purchase) -> purchase.getPrice() > 5.00)
+                .selectKey(purchaseDateAsKey)
+                .to(BIGSPENDERS, Produced.with(Serdes.Long(), purchaseSerde));
 
         // build the streams topology
         return builder.build();
