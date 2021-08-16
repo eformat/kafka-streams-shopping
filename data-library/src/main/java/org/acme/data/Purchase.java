@@ -87,7 +87,7 @@ public class Purchase {
         this.store = store;
     }
 
-    public static Builder builder(Purchase purchase){
+    public static Builder builder(Purchase purchase) {
         return new Builder(purchase);
     }
 

@@ -8,6 +8,10 @@ import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.kstream.*;
+import org.apache.kafka.streams.state.KeyValueBytesStoreSupplier;
+import org.apache.kafka.streams.state.KeyValueStore;
+import org.apache.kafka.streams.state.StoreBuilder;
+import org.apache.kafka.streams.state.Stores;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
@@ -18,6 +22,7 @@ import java.util.Date;
 @ApplicationScoped
 public class KafkaStreaming {
 
+    // topic names
     private final String PURCHASES = "purchases";
     private final String MASKED = "masked";
     private final String REWARDS = "rewards";
@@ -25,6 +30,9 @@ public class KafkaStreaming {
     private final String NORTH = "north";
     private final String SOUTH = "south";
     private final String STORAGE = "storage";
+
+    // state stores
+    private final String REWARDS_STORE = "rewardsPointsStore";
 
     @Produces
     public Topology startPurchasingTopology() {
@@ -48,13 +56,24 @@ public class KafkaStreaming {
 
         // mask pii
         builder.stream(PURCHASES, Consumed.with(purchaseKeySerde, purchaseSerde))
-                .mapValues(p -> p.builder(p).build())
+                .mapValues(purchase -> purchase.builder(purchase).build())
                 .to(MASKED, Produced.with(purchaseKeySerde, purchaseSerde));
 
-        // rewards
+        /* simple rewards
         builder.stream(MASKED, Consumed.with(purchaseKeySerde, purchaseSerde))
-                .mapValues(p -> new Reward(p))
+                .mapValues(purchase -> new Reward(purchase))
                 .to(REWARDS, Produced.with(purchaseKeySerde, rewardSerde));
+                */
+        // accumulate rewards with stateStore
+        KeyValueBytesStoreSupplier storeSupplier = Stores.inMemoryKeyValueStore(REWARDS_STORE);
+        StoreBuilder<KeyValueStore<String, Integer>> storeBuilder = Stores.keyValueStoreBuilder(storeSupplier, Serdes.String(), Serdes.Integer());
+        builder.addStateStore(storeBuilder);
+
+        KeyValueMapper<PurchaseKey, Purchase, String> purchaseCutomerAsKey = (purchaseKey, purchase) -> purchase.getCustomerId();
+        builder.stream(MASKED, Consumed.with(purchaseKeySerde, purchaseSerde))
+                .selectKey(purchaseCutomerAsKey)
+                .transformValues(() -> new RewardTransformer(REWARDS_STORE), REWARDS_STORE)
+                .to(REWARDS, Produced.with(Serdes.String(), rewardSerde));
 
         // bigspenders
         KeyValueMapper<PurchaseKey, Purchase, Long> purchaseDateAsKey = (purchaseKey, purchase) -> purchase.getPurchaseKey().getTransactionDate().getTime();
@@ -85,7 +104,7 @@ public class KafkaStreaming {
 
     public interface SecurityDBService {
         static void saveRecord(Date date, String employeeId, String item) {
-            System.out.println(">>> Warning!! Found potential problem !! Saving transaction on "+date+" for "+employeeId+" item "+ item);
+            System.out.println(">>> SECURITY WARNING !! Found potential problem - Saving transaction on " + date + " for " + employeeId + " item " + item);
         }
     }
 
